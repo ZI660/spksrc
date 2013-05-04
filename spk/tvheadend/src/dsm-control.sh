@@ -14,11 +14,17 @@ PID_FILE="${INSTALL_DIR}/var/tvheadend.pid"
 
 start_daemon ()
 {
-    ${TVHEADEND} -f -u ${USER} -c ${INSTALL_DIR}/var -p ${PID_FILE}
+    if [ -f /opt/bin/mediaclient ]; then
+        /opt/bin/mediaclient --wait-for-devices --start
+    fi
+    LD_PRELOAD=/opt/lib/libmediaclient.so ${TVHEADEND} -f -u ${USER} -c ${INSTALL_DIR}/var -p ${PID_FILE}
 }
 
 stop_daemon ()
 {
+    if [ -f /opt/bin/mediaclient ]; then
+        /opt/bin/mediaclient --shutdown
+    fi
     kill `cat ${PID_FILE}`
     wait_for_status 1 20
     rm -f ${PID_FILE}
